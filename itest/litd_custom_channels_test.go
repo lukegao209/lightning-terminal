@@ -1403,6 +1403,34 @@ func testCustomChannelsForceClose(_ context.Context, net *NetworkHarness,
 	// UTXO he can use.
 	assertNumAssetUTXOs(t.t, daveTap, 1)
 	assertNumAssetUTXOs(t.t, charlieTap, 2)
+
+	// We'll make sure Dave can spend his asset UTXO by sending it all but
+	// one unit to Zane (the universe).
+	assetSendAmount := daveBalance - 1
+	zaneAddr, err := universeTap.NewAddr(ctxb, &taprpc.NewAddrRequest{
+		Amt:     assetSendAmount,
+		AssetId: assetID,
+		ProofCourierAddr: fmt.Sprintf(
+			"%s://%s", proof.UniverseRpcCourierType,
+			charlieTap.node.Cfg.LitAddr(),
+		),
+	})
+	require.NoError(t.t, err)
+
+	t.Logf("Sending %v asset units to Zane...", daveBalance-1)
+
+	// Send the assets to Zane.
+	itest.AssertAddrCreated(t.t, universeTap, cents, zaneAddr)
+	sendResp, err := daveTap.SendAsset(ctxb, &taprpc.SendAssetRequest{
+		TapAddrs: []string{zaneAddr.Encoded},
+	})
+	require.NoError(t.t, err)
+	itest.ConfirmAndAssertOutboundTransfer(
+		t.t, t.lndHarness.Miner.Client, daveTap, sendResp, assetID,
+		[]uint64{1, assetSendAmount}, 0, 1,
+	)
+	itest.AssertNonInteractiveRecvComplete(t.t, universeTap, 1)
+
 }
 
 // testCustomChannelsBreach tests a force close scenario that breaches an old
