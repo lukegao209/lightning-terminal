@@ -1419,7 +1419,8 @@ func testCustomChannelsForceClose(_ context.Context, net *NetworkHarness,
 
 	t.Logf("Sending %v asset units to Zane...", daveBalance-1)
 
-	// Send the assets to Zane.
+	// Send the assets to Zane. We expect dave to have 3 transfers: the
+	// funding txn, their force close sweep, and now this new send.
 	itest.AssertAddrCreated(t.t, universeTap, cents, zaneAddr)
 	sendResp, err := daveTap.SendAsset(ctxb, &taprpc.SendAssetRequest{
 		TapAddrs: []string{zaneAddr.Encoded},
@@ -1427,10 +1428,9 @@ func testCustomChannelsForceClose(_ context.Context, net *NetworkHarness,
 	require.NoError(t.t, err)
 	itest.ConfirmAndAssertOutboundTransfer(
 		t.t, t.lndHarness.Miner.Client, daveTap, sendResp, assetID,
-		[]uint64{1, assetSendAmount}, 0, 1,
+		[]uint64{1, assetSendAmount}, 2, 3,
 	)
 	itest.AssertNonInteractiveRecvComplete(t.t, universeTap, 1)
-
 }
 
 // testCustomChannelsBreach tests a force close scenario that breaches an old
