@@ -5,17 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Tests",
-      "type": "node",
+      "name": "Launch Terminal",
+      "buildFlags": ["-tags=litd,autopilotrpc,signrpc,walletrpc,chainrpc,invoicesrpc,watchtowerrpc,neutrinorpc,peersrpc"],
+      "type": "go",
       "request": "launch",
-      "runtimeExecutable": "${workspaceRoot}/app/node_modules/.bin/react-scripts",
-      "args": ["test", "--runInBand", "--no-cache", "--watchAll=false"],
-      "cwd": "${workspaceRoot}/app/",
-      "protocol": "inspector",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "env": { "CI": "true" },
-      "disableOptimisticBPs": true
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/litd/main.go",
+      "args": ["--configfile","/Users/luke/Desktop/taprootassets/litd.conf"]
     }
   ]
 }
